@@ -20,7 +20,7 @@ public class FundTypeDetail {
 	
 	@Column( length = 500)
 	private String investInstruments;
-	@Column( length = 20)
+	@Column( length = 200)
 	private String riskLevel;
 	private Integer riskLevelScore;
 	@Column( length = 1000)
