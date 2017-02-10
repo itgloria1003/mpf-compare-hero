@@ -17,7 +17,7 @@ import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import hk.cuhk.cmsc5702.util.MpfWebScrapper;
 
 @RestController
-
+@RequestMapping("/fundtype")
 public class FundTypeRestController {
 
 	private FundTypeDetailRepository repository;
