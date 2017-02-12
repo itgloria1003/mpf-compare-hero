@@ -42,6 +42,7 @@ public class SponsorRestController {
 			}
 			return message;
 	}
+	
 	@RequestMapping("/sponsorList")
 	public Iterable<SponsorDetail> getSponsorDetail(
 			@RequestParam(value = "sort", defaultValue = "sponsor") String sort,

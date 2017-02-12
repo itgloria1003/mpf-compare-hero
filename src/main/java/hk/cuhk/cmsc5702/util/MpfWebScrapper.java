@@ -92,7 +92,6 @@ public class MpfWebScrapper {
         	}
         }
         		
-        		
         List<HtmlTableRow> scrollableTableRows = scrollableTableBody.getRows();
         for (int rowIdx = 0 ; rowIdx< scrollableTableRows.size(); rowIdx++) {
         	FundTypeDetail detail = fundtypeDetails.get(rowIdx);

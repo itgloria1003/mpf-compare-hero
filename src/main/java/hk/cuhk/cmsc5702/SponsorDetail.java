@@ -46,4 +46,5 @@ public class SponsorDetail {
 	public void setContactInfo(String contactInfo){
 		this.contactInfo = contactInfo;
 	}
+	
 }
