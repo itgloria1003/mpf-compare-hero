@@ -2,8 +2,10 @@
 package hk.cuhk.cmsc5702;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -25,18 +27,21 @@ import hk.cuhk.cmsc5702.util.MpfWebScrapper;
 public class FundTypeRestController {
 
 	private FundTypeDetailRepository repository;
+	private MpfFundTypeStatRepository statRepository;
 
 	private MpfWebScrapper scrapper;
 
 	@Autowired
-	public FundTypeRestController(FundTypeDetailRepository repository) {
+	public FundTypeRestController(FundTypeDetailRepository repository,MpfFundTypeStatRepository statRepository ) {
 		this.repository = repository;
+		this.statRepository = statRepository;
 	}
 
-	@RequestMapping(method=RequestMethod.POST,path="/action")
+	@RequestMapping(method={RequestMethod.POST, RequestMethod.GET},path="/action")
 	public OperationResult performAction(@RequestParam(name="requestAction") String requestAction) {
 		OperationResult result = new OperationResult();
 		ArrayList<FundTypeDetail> fundTypeDetails = new ArrayList<>();
+		ArrayList<MpfFundTypeStat> statDetails = new ArrayList<>();
 		try {
 			scrapper = new MpfWebScrapper();
 			
@@ -48,6 +53,13 @@ public class FundTypeRestController {
 				fundTypeDetails = scrapper.scrapFundTypeDetail(false, null);
 				repository.deleteAll();
 				repository.save(fundTypeDetails);
+				
+				statDetails = scrapper.scrapFundTypeStat(false, null);
+				statRepository.deleteAll();
+				statRepository.save(statDetails);
+				
+				
+				
 			}
 			
 			
@@ -70,6 +82,13 @@ public class FundTypeRestController {
 		return records;
 
 	}
+	 
+	 @GetMapping("/stat")
+		public Iterable<MpfFundTypeStat> getFundTypeStats(
+				@RequestParam(value = "asOfDate") String asOfDate) {
+		 	return statRepository.findByAsOfDate(asOfDate);
+
+		}
 
   
 
