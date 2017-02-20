@@ -3,9 +3,12 @@ package hk.cuhk.cmsc5702.util;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import org.apache.log4j.Logger;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.DefaultCredentialsProvider;
@@ -19,6 +22,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlTableHeader;
 import com.gargoylesoftware.htmlunit.html.HtmlTableRow;
 
 import hk.cuhk.cmsc5702.FundTypeDetail;
+import hk.cuhk.cmsc5702.MpfFundDetail;
 import hk.cuhk.cmsc5702.MpfFundTypeStat;
 import hk.cuhk.cmsc5702.ProxySetting;
 import hk.cuhk.cmsc5702.SponsorDetail;
@@ -26,6 +30,21 @@ import hk.cuhk.cmsc5702.SponsorDetail;
 
 public class MpfWebScrapper {
 
+	
+	
+	private static final String FUND_RISK_INDICATOR = "Fund Risk Indicator";
+	private static final String ANNUALISED_RETURN_10_YEAR = "Annualised Return 10 year";
+	private static final String ANNUALISED_RETURN_5_YEAR = "Annualised Return 5 year";
+	private static final String OCI_5_YEAR = "OCI 5 Year";
+	private static final String OCI_1_YEAR = "OCI 1 Year";
+	private static final String LATEST_FER = "Latest FER";
+	private static final String FUND_TYPE = "Fund Type";
+	private static final String FUND = "Fund";
+	private static final String CONSTITUENT = "Constituent";
+	private static final String SCHEME = "Scheme";
+	private static final String MPF_TRUSTEE = "MPF Trustee";
+
+	
 	private static final String HKIFA_FUND_TYPE_STAT = "http://www.hkifa.org.hk/eng/MPF-Statistics.aspx";
 	private static final String FUND_TYPE_DETAIL_URL = "http://minisite.mpfa.org.hk/mpfie/en/jjfive/detailed-profile.html";
 	private static final String DIV_CLASS_DRAGGER_TABLE = "//div[@class='dashed-box pad15 clearfix dragger-table']";
@@ -47,6 +66,101 @@ public class MpfWebScrapper {
 	private static final String ATTR_CONTACT_INFO = "Contact Info";
 	private static final String [] ATTR_SPONSOR_LIST = {ATTR_SPONSOR,ATTR_TRUSTEE,ATTR_SCHEME,ATTR_CONTACT_INFO}; 
 	
+	
+	
+	public static final void main(String argsp[]){
+		MpfWebScrapper s = new MpfWebScrapper();
+		try {
+			s.scrapMpfFundDetails(false, null);
+		} catch (FailingHttpStatusCodeException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public ArrayList<MpfFundDetail> scrapMpfFundDetails(boolean useProxy, ProxySetting setting) throws FailingHttpStatusCodeException, MalformedURLException, IOException{
+		ArrayList<MpfFundDetail> list = new ArrayList<MpfFundDetail>();
+		WebClient webClient = createWebClient(useProxy, setting);
+		final HtmlPage page = webClient.getPage("http://cplatform.mpfa.org.hk/MPFA/eng/cf_list.jsp");
+		 final HtmlTable table = (HtmlTable) page.getByXPath("//div[@class='tableContainer']/table[@class='txt']").get(0);
+		 
+		 
+		 List<HtmlTableRow> rows = table.getBodies().get(0).getRows();
+		 
+		 
+		 HashMap<String, Integer> attributeColumnMap = new HashMap<String, Integer>() ;
+			attributeColumnMap.put(MPF_TRUSTEE, 0);
+			attributeColumnMap.put(SCHEME, 1);
+			attributeColumnMap.put(CONSTITUENT, 2);
+			attributeColumnMap.put(FUND_TYPE, 3);
+			attributeColumnMap.put(LATEST_FER, 4);
+			attributeColumnMap.put(OCI_1_YEAR, 5);
+			attributeColumnMap.put(OCI_5_YEAR, 6);
+			attributeColumnMap.put(FUND_RISK_INDICATOR, 6);
+			attributeColumnMap.put(ANNUALISED_RETURN_5_YEAR, 8);
+			attributeColumnMap.put(ANNUALISED_RETURN_10_YEAR, 9);
+			
+			for (int rowIdx = 0 ; rowIdx< rows.size(); rowIdx++) {
+	        	MpfFundDetail d = new MpfFundDetail();
+	        	for (String key : attributeColumnMap.keySet() ){
+	        		
+					int colIdx = attributeColumnMap.get(key);
+					String valueStr = rows.get(rowIdx).getCell(colIdx).asText(); 
+					if (MPF_TRUSTEE.equals(key)){
+						d.setTrustee(valueStr);
+					} else if (SCHEME.equals(key)){
+						d.setScheme(valueStr);
+					} else if (CONSTITUENT.equals(key)){
+						d.setConstituentFund(valueStr);
+					} else if (FUND_TYPE.equals(key)){
+						d.setFundType(valueStr);
+					} else if (LATEST_FER.equals(key)){
+						try{ 
+							d.setLatestFER(new BigDecimal(valueStr.replaceAll("%", "")).movePointLeft(2));
+						} catch (Exception e){
+							d.setLatestFER(null);
+						}
+					} else if (OCI_1_YEAR.equals(key)){
+						try { 
+							d.setOci1yr(new BigDecimal(valueStr.replaceAll("$", "")));
+						} catch (Exception e){
+							d.setOci1yr(null);
+						}
+					} else if (OCI_5_YEAR.equals(key)){
+						try { 
+							d.setOci5yr(new BigDecimal(valueStr.replaceAll("$", "")));
+						} catch (Exception e){
+							d.setOci5yr(null);
+						}
+					} else if (FUND_RISK_INDICATOR.equals(key)){
+						try{ 
+							d.setFundRiskIndicator(new BigDecimal(valueStr.replaceAll("%", "")).movePointLeft(2));
+						} catch (Exception e){
+							d.setFundRiskIndicator(null);
+						}
+						
+					} else if (ANNUALISED_RETURN_5_YEAR.equals(key)){
+						try { 
+							d.setAnnualReturn5yr(new BigDecimal(valueStr.replaceAll("%", "")).movePointLeft(2));
+						} catch (Exception e){
+							d.setAnnualReturn5yr(null);
+						}
+					} else if (ANNUALISED_RETURN_10_YEAR.equals(key)){
+						try { 
+							d.setAnnualReturn10yr(new BigDecimal(valueStr.replaceAll("%", "")).movePointLeft(2));
+						} catch (Exception e){
+							d.setAnnualReturn10yr(null);
+						}
+					}
+			
+					
+	        	}
+	        	
+	        	list.add(d);
+			}
+	        	
+
+		return list;
+	}
 	
 	
 	public ArrayList<MpfFundTypeStat> scrapFundTypeStat(boolean useProxy, ProxySetting setting) throws FailingHttpStatusCodeException, MalformedURLException, IOException{
