@@ -23,6 +23,10 @@ public interface MpfFundDetailRepository extends PagingAndSortingRepository<MpfF
 	Iterable<MpfFundDetail> findByFundTypeAndTrusteeOrderBySchemeAscConstituentFundAsc(String filterFundType,
 			String filterTrustee);
 
+	Iterable<MpfFundDetail> findByLatestFERIsNotNull();
+
+	Iterable<MpfFundDetail> findByRiskCatOrderBySchemeAscConstituentFundAsc(Integer riskCat);
+
 
 
     

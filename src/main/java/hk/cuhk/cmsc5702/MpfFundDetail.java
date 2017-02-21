@@ -24,6 +24,14 @@ public class MpfFundDetail {
 	private BigDecimal oci1yr;
 	private BigDecimal oci5yr;
 	private BigDecimal fundRiskIndicator; 
+	private Integer riskCat;
+	
+	public Integer getRiskCat() {
+		return riskCat;
+	}
+	public void setRiskCat(Integer riskCat) {
+		this.riskCat = riskCat;
+	}
 	private BigDecimal annualReturn5yr; 
 	private BigDecimal annualReturn10yr;
 	public String getScheme() {
@@ -94,11 +102,12 @@ public class MpfFundDetail {
 	}
 	@Override
 	public String toString() {
-		return "MpfFundDetail [scheme=" + scheme + ", trustee=" + trustee + ", constituentFund=" + constituentFund
-				+ ", fundType=" + fundType + ", latestFER=" + latestFER + ", oci1yr=" + oci1yr + ", oci5yr=" + oci5yr
-				+ ", fundRiskIndicator=" + fundRiskIndicator + ", annualReturn5yr=" + annualReturn5yr
-				+ ", annualReturn10yr=" + annualReturn10yr + "]";
+		return "MpfFundDetail [id=" + id + ", scheme=" + scheme + ", trustee=" + trustee + ", constituentFund="
+				+ constituentFund + ", fundType=" + fundType + ", latestFER=" + latestFER + ", oci1yr=" + oci1yr
+				+ ", oci5yr=" + oci5yr + ", fundRiskIndicator=" + fundRiskIndicator + ", riskCat=" + riskCat
+				+ ", annualReturn5yr=" + annualReturn5yr + ", annualReturn10yr=" + annualReturn10yr + "]";
 	}
+	
 	
 
 }

@@ -14,16 +14,20 @@ import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.DefaultCredentialsProvider;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.DomElement;
+import com.gargoylesoftware.htmlunit.html.DomNodeList;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlTable;
 import com.gargoylesoftware.htmlunit.html.HtmlTableBody;
 import com.gargoylesoftware.htmlunit.html.HtmlTableCell;
 import com.gargoylesoftware.htmlunit.html.HtmlTableHeader;
 import com.gargoylesoftware.htmlunit.html.HtmlTableRow;
+import com.gargoylesoftware.htmlunit.xml.XmlPage;
 
 import hk.cuhk.cmsc5702.FundTypeDetail;
 import hk.cuhk.cmsc5702.MpfFundDetail;
 import hk.cuhk.cmsc5702.MpfFundTypeStat;
+import hk.cuhk.cmsc5702.MpfNews;
 import hk.cuhk.cmsc5702.ProxySetting;
 import hk.cuhk.cmsc5702.SponsorDetail;
 
@@ -71,12 +75,16 @@ public class MpfWebScrapper {
 	public static final void main(String argsp[]){
 		MpfWebScrapper s = new MpfWebScrapper();
 		try {
-			s.scrapMpfFundDetails(false, null);
+		s.scrapMpfFundDetails(false, null);
+			//s.scrapeNews(false, null);
 		} catch (FailingHttpStatusCodeException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+	
+	
+	
 	public ArrayList<MpfFundDetail> scrapMpfFundDetails(boolean useProxy, ProxySetting setting) throws FailingHttpStatusCodeException, MalformedURLException, IOException{
 		ArrayList<MpfFundDetail> list = new ArrayList<MpfFundDetail>();
 		WebClient webClient = createWebClient(useProxy, setting);
@@ -95,7 +103,7 @@ public class MpfWebScrapper {
 			attributeColumnMap.put(LATEST_FER, 4);
 			attributeColumnMap.put(OCI_1_YEAR, 5);
 			attributeColumnMap.put(OCI_5_YEAR, 6);
-			attributeColumnMap.put(FUND_RISK_INDICATOR, 6);
+			attributeColumnMap.put(FUND_RISK_INDICATOR, 7);
 			attributeColumnMap.put(ANNUALISED_RETURN_5_YEAR, 8);
 			attributeColumnMap.put(ANNUALISED_RETURN_10_YEAR, 9);
 			
@@ -134,6 +142,15 @@ public class MpfWebScrapper {
 					} else if (FUND_RISK_INDICATOR.equals(key)){
 						try{ 
 							d.setFundRiskIndicator(new BigDecimal(valueStr.replaceAll("%", "")).movePointLeft(2));
+							if (d.getFundRiskIndicator()!=null){
+								if (d.getFundRiskIndicator().doubleValue()>=0.18){
+									d.setRiskCat(3);
+								} else if (d.getFundRiskIndicator().doubleValue()>=0.08){
+									d.setRiskCat(2);
+								} else {
+									d.setRiskCat(1);
+								}
+							}
 						} catch (Exception e){
 							d.setFundRiskIndicator(null);
 						}
@@ -197,7 +214,7 @@ public class MpfWebScrapper {
 			
 		}
 		
-		
+		webClient.close();
 		
 		
 		return statList;
@@ -262,7 +279,7 @@ public class MpfWebScrapper {
         	        	
         }
         
-        
+        webClient.close();
        return fundtypeDetails; 
         
 		

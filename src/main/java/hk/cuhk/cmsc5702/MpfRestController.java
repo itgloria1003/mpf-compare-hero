@@ -80,21 +80,24 @@ public class MpfRestController {
 		ArrayList<FundTypeDetail> fundTypeDetails;
 		ArrayList<MpfFundTypeStat> statDetails;
 		ArrayList<MpfFundDetail> fundDetails;
-//		fundTypeDetails = scrapper.scrapFundTypeDetail(false, null);
-//		repository.deleteAll();
-//		repository.save(fundTypeDetails);
-//		
-//		statDetails = scrapper.scrapFundTypeStat(false, null);
-//		statRepository.deleteAll();
-//		statRepository.save(statDetails);
+		fundTypeDetails = scrapper.scrapFundTypeDetail(false, null);
+		repository.deleteAll();
+		repository.save(fundTypeDetails);
+		
+		statDetails = scrapper.scrapFundTypeStat(false, null);
+		statRepository.deleteAll();
+		statRepository.save(statDetails);
 		
 		fundDetails = scrapper.scrapMpfFundDetails(false, null);
 		fundRepository.deleteAll();
 		fundRepository.save(fundDetails);
 		
 		MpfFilterLists lists = evalFilterParamList(fundDetails);
+		filterParamRepository.deleteAll();
 		filterParamRepository.save(lists.getFundtypeList());
 		filterParamRepository.save(lists.getTrusteeList());
+		
+		
 		
 		
 		
@@ -118,17 +121,16 @@ public class MpfRestController {
 		return list;
 	}
 
-	
-	
-	 @GetMapping("/list")
-	public Iterable<FundTypeDetail> getFundTypeDetails(
-			@RequestParam(value = "sort", defaultValue = "fundType") String sort,
-			@RequestParam(value = "dir", defaultValue = "asc") String dir) {
-		Direction direction = "desc".equals(dir) ? Direction.DESC : Direction.ASC;
-		Iterable<FundTypeDetail> records = repository.findAll(new Sort(direction, sort));
-		return records;
 
-	}
+	 @GetMapping("/list")
+		public Iterable<FundTypeDetail> getFundTypeDetails(
+				@RequestParam(value = "sort", defaultValue = "fundType") String sort,
+				@RequestParam(value = "dir", defaultValue = "asc") String dir) {
+			Direction direction = "desc".equals(dir) ? Direction.DESC : Direction.ASC;
+			Iterable<FundTypeDetail> records = repository.findAll(new Sort(direction, sort));
+			return records;
+
+		}
 	 
 	 @GetMapping("/stat")
 		public Iterable<MpfFundTypeStat> getFundTypeStats(
@@ -137,14 +139,30 @@ public class MpfRestController {
 
 		}
 
+//	 @GetMapping("/stat/byFundType") 
+//	 public MpfStatByFundType getStatByFundType(){
+//		 for ()
+//		  fundRepository.findByLatestFERIsNotNullByFundType();
+//		 
+//	 }
 	
 		
 	 @GetMapping("/details")
 	public Iterable<MpfFundDetail> getMpfFundDetails(
 			@RequestParam(value = "sort", defaultValue = "scheme") String sort,
-			@RequestParam(value = "dir", defaultValue = "asc") String dir) {
+			@RequestParam(value = "dir", defaultValue = "asc") String dir,
+			@RequestParam(required=false, value="riskCat") Integer riskCat
+			) {
 		Direction direction = "desc".equals(dir) ? Direction.DESC : Direction.ASC;
-		Iterable<MpfFundDetail> records = fundRepository.findAll(new Sort(direction, sort));
+		
+		Iterable<MpfFundDetail> records = null; 
+		
+		if (riskCat!=null){
+			records= fundRepository.findByRiskCatOrderBySchemeAscConstituentFundAsc(riskCat);
+		}
+		 else {
+			 records=fundRepository.findAll(new Sort(direction, sort));
+		}
 		return records;
 
 	}
