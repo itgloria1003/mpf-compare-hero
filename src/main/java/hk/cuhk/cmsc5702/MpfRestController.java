@@ -151,12 +151,17 @@ public class MpfRestController {
 		public Iterable<FilterParam> getFundTypeStatsDates() {
 		 ArrayList<FilterParam>  list = new ArrayList<FilterParam>();
 		 	 Iterable<MpfFundTypeStat> findAll = statRepository.findAll();
+		 	 HashMap map = new HashMap();
 		 	 for (MpfFundTypeStat s :findAll){
 		 		  FilterParam p = new FilterParam();
 		 		  p.setFilterType("AS_OF_DATE");
 		 		  p.setCode(s.getAsOfDate());
 		 		  p.setValue(s.getAsOfDate());
-		 		  list.add(p);
+		 		  if (map.get(s.getAsOfDate())!=null){
+		 			 list.add(p);
+		 			 map.put(s.getAsOfDate(), s.getAsOfDate());
+		 		  }
+		 		 
 		 	 }
 		 	 return list;
 
