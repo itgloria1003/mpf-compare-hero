@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.util.StringUtils;
@@ -45,6 +46,8 @@ public class MpfRestController {
 		this.statRepository = statRepository;
 		this.fundRepository = fundRepository; 
 		this.filterParamRepository = filterParamRepository; 
+		this.scrapper= new MpfWebScrapper();
+		
 	}
 
 	@RequestMapping(method={RequestMethod.POST, RequestMethod.GET},path="/action")
@@ -52,7 +55,7 @@ public class MpfRestController {
 		OperationResult result = new OperationResult();
 		
 		try {
-			scrapper = new MpfWebScrapper();
+			
 			
 			if ("delete".equals(requestAction)){
 				repository.deleteAll();
@@ -91,6 +94,11 @@ public class MpfRestController {
 		fundDetails = scrapper.scrapMpfFundDetails(false, null);
 		fundRepository.deleteAll();
 		fundRepository.save(fundDetails);
+		
+		// calculate stat 
+		
+		Iterable<MpfFundDetail> statDetail = fundRepository.findByFundRiskIndicatorNotNull();
+		
 		
 		MpfFilterLists lists = evalFilterParamList(fundDetails);
 		filterParamRepository.deleteAll();
@@ -138,6 +146,22 @@ public class MpfRestController {
 		 	return statRepository.findByAsOfDate(asOfDate);
 
 		}
+	 
+	 @GetMapping("/statdatefilter")
+		public Iterable<FilterParam> getFundTypeStatsDates() {
+		 ArrayList<FilterParam>  list = new ArrayList<FilterParam>();
+		 	 Iterable<MpfFundTypeStat> findAll = statRepository.findAll();
+		 	 for (MpfFundTypeStat s :findAll){
+		 		  FilterParam p = new FilterParam();
+		 		  p.setFilterType("AS_OF_DATE");
+		 		  p.setCode(s.getAsOfDate());
+		 		  p.setValue(s.getAsOfDate());
+		 		  list.add(p);
+		 	 }
+		 	 return list;
+
+		}
+	 
 
 //	 @GetMapping("/stat/byFundType") 
 //	 public MpfStatByFundType getStatByFundType(){
@@ -151,37 +175,43 @@ public class MpfRestController {
 	public Iterable<MpfFundDetail> getMpfFundDetails(
 			@RequestParam(value = "sort", defaultValue = "scheme") String sort,
 			@RequestParam(value = "dir", defaultValue = "asc") String dir,
-			@RequestParam(required=false, value="riskCat") Integer riskCat
+			@RequestParam(required=false, value="riskCat") String riskCat,
+			@RequestParam(required=false, value="fundType") String fundType,
+			@RequestParam(required=false, value="trustee") String trustee,
+			@RequestParam(required=false, value="mpfId") String mpfId	
 			) {
 		Direction direction = "desc".equals(dir) ? Direction.DESC : Direction.ASC;
 		
 		Iterable<MpfFundDetail> records = null; 
+		MpfFundDetail criteria  = new MpfFundDetail();
+		if (!StringUtils.isEmpty(riskCat)){
+		criteria.setRiskCat(Integer.parseInt(riskCat));
+		}
+		if (!StringUtils.isEmpty(fundType)){
+		criteria.setFundType(fundType);
+		} 
+		if (!StringUtils.isEmpty(trustee)){
+		criteria.setTrustee(trustee);
+		}
+		if (!StringUtils.isEmpty(mpfId)){
+		criteria.setId(Long.parseLong(mpfId));
+		}
+		Example <MpfFundDetail> example = Example.of(criteria);
+		records=  fundRepository.findAll(example, new Sort(direction, sort));
 		
-		if (riskCat!=null){
-			records= fundRepository.findByRiskCatOrderBySchemeAscConstituentFundAsc(riskCat);
-		}
-		 else {
-			 records=fundRepository.findAll(new Sort(direction, sort));
-		}
 		return records;
 
 	}
+	 
 	 
 	 @GetMapping("/mpffilter")
 		public MpfFilterLists getFilterLists(@RequestParam(required=false, value="filterFundType") String filterFundType,
 				@RequestParam(required=false,value="filterTrustee") String filterTrustee){
 		 Iterable<MpfFundDetail> records = new ArrayList<MpfFundDetail>(); 
-		 
-		 if (!StringUtils.isEmpty(filterFundType) && !StringUtils.isEmpty(filterTrustee)){
-			  records = fundRepository.findByFundTypeAndTrusteeOrderBySchemeAscConstituentFundAsc(filterFundType, filterTrustee);
-		 } else if (!StringUtils.isEmpty(filterFundType)){
-			 records = fundRepository.findByFundTypeOrderBySchemeAscConstituentFundAsc(filterFundType);
-		 } else if (!StringUtils.isEmpty(filterTrustee)){
-			 records = fundRepository.findByTrusteeOrderBySchemeAscConstituentFundAsc(filterTrustee);
-		 } else {
+		
 			 records = fundRepository.findByOrderBySchemeAscConstituentFundAsc();
 			 
-		 }
+		 
 		 MpfFilterLists list = new MpfFilterLists();
 		 list.setFundtypeList(filterParamRepository.findAllByFilterType(FilterParam.FUND_TYPE));
 		 list.setTrusteeList(filterParamRepository.findAllByFilterType(FilterParam.TRUSTEE));

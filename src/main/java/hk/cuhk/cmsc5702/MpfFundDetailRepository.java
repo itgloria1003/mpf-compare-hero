@@ -1,11 +1,10 @@
 package hk.cuhk.cmsc5702;
 
-import java.util.List;
-
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Example;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.QueryByExampleExecutor;
 
-public interface MpfFundDetailRepository extends PagingAndSortingRepository<MpfFundDetail, Long> {
+public interface MpfFundDetailRepository extends PagingAndSortingRepository<MpfFundDetail, Long>,QueryByExampleExecutor<MpfFundDetail>  {
 
 	Iterable<MpfFundDetail> findByFundTypeAndTrustee(String filterFundType, String filterTrustee);
 
@@ -13,21 +12,23 @@ public interface MpfFundDetailRepository extends PagingAndSortingRepository<MpfF
 
 	Iterable<MpfFundDetail> findByTrustee(String filterTrustee);
 
-
+//
 	Iterable<MpfFundDetail> findByOrderBySchemeAscConstituentFundAsc();
 
-	Iterable<MpfFundDetail> findByTrusteeOrderBySchemeAscConstituentFundAsc(String filterTrustee);
+//	Iterable<MpfFundDetail> findByTrusteeOrderBySchemeAscConstituentFundAsc(String filterTrustee);
+//
+//	Iterable<MpfFundDetail> findByFundTypeOrderBySchemeAscConstituentFundAsc(String filterFundType);
 
-	Iterable<MpfFundDetail> findByFundTypeOrderBySchemeAscConstituentFundAsc(String filterFundType);
-
-	Iterable<MpfFundDetail> findByFundTypeAndTrusteeOrderBySchemeAscConstituentFundAsc(String filterFundType,
-			String filterTrustee);
+//	Iterable<MpfFundDetail> findByFundTypeAndTrusteeOrderBySchemeAscConstituentFundAsc(String filterFundType,
+//			String filterTrustee);
 
 	Iterable<MpfFundDetail> findByLatestFERIsNotNull();
 
-	Iterable<MpfFundDetail> findByRiskCatOrderBySchemeAscConstituentFundAsc(Integer riskCat);
+	Iterable<MpfFundDetail>  findByFundRiskIndicatorNotNull();
 
 
+	
 
+	
     
 }

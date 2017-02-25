@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.commons.math3.stat.StatUtils;
 import org.apache.log4j.Logger;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
@@ -24,6 +25,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlTableHeader;
 import com.gargoylesoftware.htmlunit.html.HtmlTableRow;
 import com.gargoylesoftware.htmlunit.xml.XmlPage;
 
+import ch.qos.logback.core.status.StatusUtil;
 import hk.cuhk.cmsc5702.FundTypeDetail;
 import hk.cuhk.cmsc5702.MpfFundDetail;
 import hk.cuhk.cmsc5702.MpfFundTypeStat;
@@ -175,7 +177,8 @@ public class MpfWebScrapper {
 	        	list.add(d);
 			}
 	        	
-
+		// for each group type, find the mean 
+		
 		return list;
 	}
 	

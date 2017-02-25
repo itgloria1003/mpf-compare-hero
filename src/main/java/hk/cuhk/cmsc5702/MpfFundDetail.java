@@ -14,7 +14,7 @@ public class MpfFundDetail {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	private Long id;
 	private String scheme;
 	
 	private String trustee ; 
@@ -94,10 +94,11 @@ public class MpfFundDetail {
 	public void setAnnualReturn10yr(BigDecimal annualReturn10yr) {
 		this.annualReturn10yr = annualReturn10yr;
 	}
-	public long getId() {
+	
+	public Long getId() {
 		return id;
 	}
-	public void setId(long id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 	@Override
