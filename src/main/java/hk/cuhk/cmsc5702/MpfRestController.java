@@ -157,10 +157,11 @@ public class MpfRestController {
 		 		  p.setFilterType("AS_OF_DATE");
 		 		  p.setCode(s.getAsOfDate());
 		 		  p.setValue(s.getAsOfDate());
-		 		  if (map.get(s.getAsOfDate())!=null){
+		 		  if (map.get(s.getAsOfDate())==null){
 		 			 list.add(p);
 		 			 map.put(s.getAsOfDate(), s.getAsOfDate());
 		 		  }
+		 		  
 		 		 
 		 	 }
 		 	 return list;
