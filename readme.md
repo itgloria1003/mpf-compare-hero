@@ -6,7 +6,9 @@ OR
 - download <a href="https://github.com/itgloria1003/mpf-compare-hero/raw/master/target/app.jar">app.jar</a> file 
 - Java version: 1.8 
 Run the command 
-<pre> java -Dserver.port=8081 -jar app.jar <pre>
+<pre> java -Dserver.port=8080 -jar app.jar <pre>
+
+Open the browser and type http://localhost:8080/index.html to launch the application
 
 
 
